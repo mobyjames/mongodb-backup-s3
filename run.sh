@@ -8,6 +8,8 @@ MONGODB_USER=${MONGODB_USER:-${MONGODB_ENV_MONGODB_USER}}
 MONGODB_PASS=${MONGODB_PASS:-${MONGODB_ENV_MONGODB_PASS}}
 
 S3PATH="s3://$BUCKET/$BACKUP_FOLDER"
+S3HOST="ewr1.vultrobjects.com"
+S3HOST_BUCKET="%(bucket)s.ewr1.vultrobjects.com"
 
 [[ ( -z "${MONGODB_USER}" ) && ( -n "${MONGODB_PASS}" ) ]] && MONGODB_USER='admin'
 
@@ -27,7 +29,7 @@ BACKUP_NAME=\${TIMESTAMP}.dump.gz
 S3BACKUP=${S3PATH}\${BACKUP_NAME}
 S3LATEST=${S3PATH}latest.dump.gz
 echo "=> Backup started"
-if mongodump --host ${MONGODB_HOST} --port ${MONGODB_PORT} ${USER_STR}${PASS_STR}${DB_STR} --archive=\${BACKUP_NAME} --gzip ${EXTRA_OPTS} && aws s3 cp \${BACKUP_NAME} \${S3BACKUP} && aws s3 cp \${S3BACKUP} \${S3LATEST} && rm \${BACKUP_NAME} ;then
+if mongodump --host ${MONGODB_HOST} --port ${MONGODB_PORT} ${USER_STR}${PASS_STR}${DB_STR} --archive=\${BACKUP_NAME} --gzip ${EXTRA_OPTS} && s3cmd --host \${S3HOST} --host-bucket="\${S3HOST_BUCKET}" --access_key \${AWS_ACCESS_KEY_ID} --secret_key \${AWS_SECRET_ACCESS_KEY} put \${BACKUP_NAME} \${S3BACKUP} && rm \${BACKUP_NAME} ;then
     echo "   > Backup succeeded"
 else
     echo "   > Backup failed"
@@ -44,7 +46,7 @@ cat <<EOF >> /restore.sh
 if [[( -n "\${1}" )]];then
     RESTORE_ME=\${1}.dump.gz
 else
-    RESTORE_ME=latest.dump.gz
+    exit 0
 fi
 S3RESTORE=${S3PATH}\${RESTORE_ME}
 echo "=> Restore database from \${RESTORE_ME}"
