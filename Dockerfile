@@ -10,7 +10,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E52529D4 && \
     apt-get update && \
     apt-get install mongodb-org-shell=$MONGO_VERSION mongodb-org-tools=$MONGO_VERSION
     
-RUN apt-get -y install cron s3cmd
+RUN apt-get update && apt-get -y install cron s3cmd
 
 ENV CRON_TIME="0 3 * * *" \
   TZ=US/Eastern \
