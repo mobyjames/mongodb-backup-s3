@@ -28,8 +28,13 @@ TIMESTAMP=\`/bin/date +"%Y%m%dT%H%M%S"\`
 BACKUP_NAME=\${TIMESTAMP}.dump.gz
 S3BACKUP=${S3PATH}\${BACKUP_NAME}
 S3LATEST=${S3PATH}latest.dump.gz
+S3HOST=${S3HOST}
+S3HOST_BUCKET=${S3HOST_BUCKET}
+AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
 echo "=> Backup started"
-if mongodump --host ${MONGODB_HOST} --port ${MONGODB_PORT} ${USER_STR}${PASS_STR}${DB_STR} --archive=\${BACKUP_NAME} --gzip ${EXTRA_OPTS} && s3cmd --host \${S3HOST} --host-bucket="\${S3HOST_BUCKET}" --access_key \${AWS_ACCESS_KEY_ID} --secret_key \${AWS_SECRET_ACCESS_KEY} put \${BACKUP_NAME} \${S3BACKUP} && rm \${BACKUP_NAME} ;then
+if mongodump --host ${MONGODB_HOST} --port ${MONGODB_PORT} ${USER_STR}${PASS_STR}${DB_STR} --archive=\${BACKUP_NAME} --gzip ${EXTRA_OPTS} && s3cmd --host ${S3HOST} --host-bucket="${S3HOST_BUCKET}" --access_key ${AWS_ACCESS_KEY_ID} --secret_key ${AWS_SECRET_ACCESS_KEY} put \${BACKUP_NAME} \${S3BACKUP} && rm \${BACKUP_NAME} ;then
     echo "   > Backup succeeded"
 else
     echo "   > Backup failed"
